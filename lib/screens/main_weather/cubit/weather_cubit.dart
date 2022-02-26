@@ -24,6 +24,7 @@ class WeatherCubit extends Cubit<WeatherState> {
   CurrentWeatherModel? structredWeatherData;
   String connection = "connected";
   int successfullyGetWeatherFlag = 0;
+  String? location;
 
   Map<String, dynamic>allData = {};
 
@@ -32,8 +33,9 @@ class WeatherCubit extends Cubit<WeatherState> {
 
   static WeatherCubit getCubit(context) => BlocProvider.of(context);
 
-  Future<dynamic> getWeatherDetails(String location) async {
-    String url = "http://api.weatherapi.com/v1/forecast.json?key=22e2434024e549c2aa0231656221502 &q=tanta&days=3&aqi=no&alerts=no";
+  Future<dynamic> getWeatherDetails() async {
+    print(location);
+    String url = "http://api.weatherapi.com/v1/forecast.json?key=22e2434024e549c2aa0231656221502&q=$location&days=3&aqi=no&alerts=no";
     emit(GetWeatherLoadingState());
 
     nextDayList = [];
@@ -105,22 +107,32 @@ class WeatherCubit extends Cubit<WeatherState> {
   }
 
 
-  getCurrentLocation() async {
-    await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
-        .then((Position position) {
-          print(position);
-          getTheCity(position.latitude, position.longitude);
-          //print(position.latitude);
-    }).catchError((e) {
-      SystemNavigator.pop();
-      print(e);
+  Future getCurrentLocation() async {
+
+    await Geolocator.requestPermission().then((value)async {
+      await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
+          .then((Position position) {
+        print(position);
+        getTheCity(position.latitude, position.longitude);
+        //print(position.latitude);
+      }).catchError((e) {
+        SystemNavigator.pop();
+        print(e);
+      });
     });
+
   }
 
   void getTheCity(double latitude,double longitude)async{
-    List<Placemark>placemarks = await placemarkFromCoordinates(latitude, longitude);
-    getWeatherDetails(placemarks[0].locality.toString());
+     await placemarkFromCoordinates(latitude, longitude).then((value) {
+       location=value[0].subAdministrativeArea.toString();
+      getWeatherDetails();
+    });
+
   }
+
+
+
 
 
 }

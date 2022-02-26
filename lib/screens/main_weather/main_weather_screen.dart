@@ -21,7 +21,9 @@ class MainWeatherScreen extends StatelessWidget {
       child: Scaffold(
           backgroundColor: Colors.transparent,
           body: BlocProvider(
-            create: (context) => WeatherCubit()..checkInternetConnectivity(),
+            create: (context){
+              return WeatherCubit()..checkInternetConnectivity();
+              },
             child: BlocConsumer<WeatherCubit, WeatherState>(
               listener: (context, state) {},
               builder: (context, state) {
@@ -50,7 +52,7 @@ class MainWeatherScreen extends StatelessWidget {
                                       child: Column(
                                         children: [
                                           Text(
-                                            "${cubit.structredWeatherData!.city}",
+                                            "${cubit.location}",
                                             style: const TextStyle(
                                               fontSize: 45,
                                               color: Colors.white,
